@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="emp">
+
+<select id="selectList"
+		resultMap="empMap">
+	select
+		*
+	from 
+		emp
+	order by
+		emp_id		
+</select>
+
+<!-- ${식별자} 홑따옴표 없이 삽입처리 -->
+<select id="search1"
+		resultMap="empMap">
+	select
+		*
+	from 
+		emp
+	where 
+		${searchType} like '%' || #{searchKeyword} || '%'
+	order by
+		emp_id
+</select>
+
+<select id="search2"
+		resultMap="empMap">
+	select *
+	from (
+			select
+				e.*,
+				decode(substr(emp_no, 8, 1), '1', '남', '3', '남', '여') gender
+			from 
+				emp e 
+		  )
+	
+	<!-- 
+		1. where절 몸통이 비어있다면, where 키워드 제거
+		2. where 다음 바로 and/or 가 오는 경우, and/or 제거
+		
+	 -->
+	<where>
+		<!-- if문에서 and or 만 사용 가능(|| or && 사용 못해유) -->
+		<if test="searchKeyword != null and searchKeyword != ''">
+			${searchType} like '%' || #{searchKeyword} || '%'
+		</if>
+		<if test="gender != null and gender != ''">
+			and gender = #{gender}
+		</if>
+		<if test="salary != null and salary != ''">
+			<choose>
+				<when test="salaryCompare eq 'le'">
+					and salary  <![CDATA[ <= ]]> #{salary}
+				</when>
+				<otherwise>
+					and salary  <![CDATA[ >= ]]> #{salary}
+				</otherwise>
+			</choose>
+		
+		</if>
+	
+	</where>
+	order by
+		emp_id
+</select>
+
+<resultMap type="map" id="empMap">
+
+	<id column="emp_id" property="empId"/>
+	<result column="emp_name" property="empName"/>
+	<result column="emp_no" property="empNo"/>
+	<result column="email" property="email"/>
+	<result column="phone" property="phone"/>
+	<result column="dept_code" property="deptCode"/>
+	<result column="job_code" property="jobCode"/>
+	<result column="sal_level" property="salLevel"/>
+	<result column="salary" property="salary"/>
+	<result column="bonus" property="bonus"/>
+	<result column="manager_id" property="managerId"/>
+	<result column="hire_date" property="hireDate"/>
+	<result column="quit_date" property="quitDate"/>
+	<result column="quit_yn" property="quitYn"/>
+	<result column="gender" property="gender"/>
+	<result column="job_name" property="jobName"/>
+	<result column="dept_title" property="deptTitle"/>
+</resultMap>  
+
+<select id="selectJobList" resultType="map">
+	select 
+		job_code "jobCode", 
+		job_name "jobName" 
+	from 
+		job 
+	order 
+		by job_code
+</select>
+
+<select id="search3" resultMap="empMap">
+	select *
+	from (
+			select
+				e.*,
+				decode(substr(emp_no, 8, 1), '1', '남', '3', '남', '여') gender,
+				(select job_name from job where job_code = e.job_code) job_name,
+				nvl((select dept_title from dept where dept_id = e.dept_code),'인턴') dept_title
+                
+			from 
+				emp e 
+		  )
+	<!-- where job_name in('J1', 'J2') -->
+	<where> 
+		<if test="jobCodeArr != null">
+			job_code in
+				<foreach collection="jobCodeArr" item="jobCode" open="(" close=")" separator=",">
+				#{jobCode}
+				</foreach>
+		</if>
+		<if test="deptCodeArr != null">
+			and nvl(dept_code, 'D0') in
+				<foreach collection="deptCodeArr" item="deptCode" open="(" close=")" separator=",">
+				#{deptCode}
+				</foreach>
+		</if>
+	</where>
+</select>
+
+<select id="selectdeptList" resultType="map">
+select 
+    dept_id "deptId",
+    dept_title "deptTitle"
+from 
+    dept
+order by 
+    dept_id
+</select>
+</mapper>
