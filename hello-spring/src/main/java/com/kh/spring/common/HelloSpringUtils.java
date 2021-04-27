@@ -1,5 +1,10 @@
 package com.kh.spring.common;
 
+import java.io.File;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class HelloSpringUtils {
 	/*
 	 *  totalPage 전체페이지수 올림(totalContents / numPerPage)
@@ -30,19 +35,7 @@ public class HelloSpringUtils {
 		int pageNo = pageStart;
 		
 		pageBar.append("<nav><ul class=\"pagination justify-content-center pagination-sm\">");
-		
-//		  <ul class="pagination justify-content-center">
-//		    <li class="page-item disabled">
-//		      <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-//		    </li>
-//		    <li class="page-item"><a class="page-link" href="#">1</a></li>
-//		    <li class="page-item"><a class="page-link" href="#">2</a></li>
-//		    <li class="page-item"><a class="page-link" href="#">3</a></li>
-//		    <li class="page-item">
-//		      <a class="page-link" href="#">Next</a>
-//		    </li>
-//		  </ul>
-		
+
 		//이전 영역
 		if(pageNo == 1) {
 			pageBar.append("<li class=\"page-item disabled\">\r\n"
@@ -83,6 +76,32 @@ public class HelloSpringUtils {
 		pageBar.append("<script>function paging(pageNo){location.href='"+ url + "' + pageNo;}</script>");
 		
 		return pageBar.toString();
+	}
+
+	public static File getRenamedFile(String saveDirectory, String oldName) {
+		File newFile = null;
+		
+		//파일명 새로 부여 20210216_1315645123_123.jpg
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmssSSS_");
+		DecimalFormat df = new DecimalFormat("000"); //30 -> 030
+		
+		//확장자 가져오기
+		String ext = "";
+		int dot = oldName.lastIndexOf(".");
+		if(dot > -1) {
+			ext = oldName.substring(dot); //.jpg
+		}
+		
+		//새로운 파일명
+		String newName = 
+				sdf.format(new Date()) + df.format(Math.random() * 999) + ext;
+		
+		//새로운 파일 객체
+		//java.io.File.File(String parent, String child)
+		newFile = new File(saveDirectory, newName);
+		System.out.println("newFile@MvcFileRenamePolicy =" + newFile );
+		
+		return newFile;
 	}
 
 }

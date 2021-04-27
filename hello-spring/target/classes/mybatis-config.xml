@@ -18,6 +18,4 @@
   	<typeHandlers>
    		<typeHandler handler="com.kh.spring.common.typehandler.StringArrayTypeHandler"/>
   	</typeHandlers>
-  	
-  	
 </configuration>

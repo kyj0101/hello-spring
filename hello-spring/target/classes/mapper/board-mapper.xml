@@ -31,6 +31,47 @@
 				default,
 				default
 				)
+	<!--  방금 insert된 board객체의 no 컬럼(pk)값을 board.no에 대입 -->
+	<selectKey resultType="_int" keyProperty="no" order="AFTER">
+		select
+			seq_board_no.currval
+		from
+			dual
+	</selectKey>
 	</insert>
+	
+	<insert id="insertAttachment">
+		insert into
+			attachment(no, board_no, original_filename, renamed_filename)
+		values(
+			seq_attachment_no.nextval,
+			#{boardNo},
+			#{originalFileName},
+			#{renamedFileName}
+		)
+	</insert>
+	
+	<select id="selectOneBoard" resultType="board">
+		select 
+			*
+		from
+			board
+		where
+			no = #{no}
+	</select>
+	
+	<select id="selectAttachList" resultMap="attachmentMap">
+		select 
+			*
+		from 
+			attachment
+		where 
+			board_no = #{no}
+	</select>
+	
+	<resultMap type="attachment" id="attachmentMap">
+		<result column="status" property="status" typeHandler="com.kh.spring.common.typehandler.BooleanStringTypeHandler"/>
+	</resultMap>
+	
 	
 </mapper>
